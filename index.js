@@ -12,27 +12,29 @@ document.addEventListener("DOMContentLoaded", () => {
         let str = '';
         const calcFunc = {
             showOnDisplay (symbol) {
-                function checkLastSymbol (symbol) {
+                function checkSymbol (symbol) {
                     let lastNumber = calcFunc.findLastNumber(symbols);
 
-                    if ( symbol.match(/[/+*]/) && symbols.length === 0) {                   
-                        input.value = '';
-                        console.log("Нельзя начинать строку с 0 или служебных знаков (кроме минуса)");
-                        return true;
-                    }
-                    ///console.log("Нельзя писать несколко точек в числе");
+                    // Настройка для корректного показа "."
                     if ( lastNumber && symbol === '.' && lastNumber.includes('.')) {
-                        console.log("есть точка");
+                        console.log(" уже есть точка");
                         return true;
                     }
-                    //if ( lastNumber.includes('.'))
-                //     // if ( symbol === '0' && symbols[symbols.length - 1].match(/[/+*-]/)) {
-                //     //     console.log("Нельзя писать 0 после служебных знаков");
-                //     //     return true;
-                //     // }
-                //     //if ( )
+                    // Настройка для корректного показа  0
+                    if ( symbol === '0' && 
+                        (( symbols.length > 1 && symbols[symbols.length - 2].match(/[/+*-]/)) ||
+                        ( !symbols[0].match(/[\d.]/) && symbols.length === 1))) {
+
+                        console.log("Ошибка с 0");
+                        return true;
+                    }
                 }
-                if (checkLastSymbol(symbol)) return;
+                if (checkSymbol(symbol)) return;
+
+                if ( symbol.match(/[/*+-]/) && symbols.length === 0) {                   
+                    symbols.push('0');
+                    str = '0';
+                }
 
                 if (symbol.match(/[/+*-]/) && symbols[symbols.length - 1].match(/[/+*-]/)) {
                     console.log("Замена знака");
@@ -41,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     input.value = str;
                     return;
                 }
+
                 symbols.push(symbol);
                 str+=symbol;
                 input.value = str;
@@ -166,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
             float() {},
             equally() {
                 input.value = this.total;
+                // symbols = [this.total];
             }
         }
             
