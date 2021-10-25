@@ -14,20 +14,32 @@ document.addEventListener("DOMContentLoaded", () => {
             showOnDisplay (symbol) {
                 function checkSymbol (symbol) {
                     let lastNumber = calcFunc.findLastNumber(symbols);
-
+                    let lastIndex = symbols.length - 1
+                    let bollean = false;
                     // Настройка для корректного показа "."
                     if ( lastNumber && symbol === '.' && lastNumber.includes('.')) {
                         console.log(" уже есть точка");
-                        return true;
+                        bollean = true;
                     }
                     // Настройка для корректного показа  0
-                    if ( symbol === '0' && 
-                        (( symbols.length > 1 && symbols[symbols.length - 2].match(/[/+*-]/)) ||
-                        ( !symbols[0].match(/[\d.]/) && symbols.length === 1))) {
-
-                        console.log("Ошибка с 0");
-                        return true;
+                    if ( symbol === '0' ) {
+                        if (symbols.length > 1 && symbols[lastIndex - 1].match(/[/+*-]/) && !symbols[lastIndex].match(/[.\d]/)){
+                            console.log(" error 2");
+                            bollean = true;
+                        } else if( !lastNumber.includes('.') && symbols[lastIndex] === '0') {
+                            console.log(" error 3");
+                            bollean = true;
+                        }
                     }
+                    //Убираем 0 если поле него идет цифра (если ноль не часть числа до точки)
+                    if( !lastNumber && symbol.match(/\d/) && symbols[lastIndex] === '0') {
+                        symbols.splice(-1,1);
+                        str = str.slice(0,-1);
+                        console.log("!!!");
+                    }
+
+                    return bollean;
+
                 }
                 if (checkSymbol(symbol)) return;
 
@@ -107,10 +119,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     return newArr.splice(firstExpressionIndex,count,`${total}`)
                 }
-                if ( !arr.join('').match(/[/+*.-]\d/)) return;
+                // Проверка есть ли в массиве хотя бы 2 слагаемых
+                if ( (!arr.join('').match(/[/+*.-]\d/)) || arr[arr.length - 1].match(/[/+*.-]/)) return;
                 newArr = arr.slice();
 
-                if ( newArr[newArr.length - 1].match(/[/+*.-]/)) return;
                 while (true) {
                     let sortChars = makePriority(newArr);
                     if( sortChars.length === 0) break;
@@ -169,9 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
             float() {},
             equally() {
                 input.value = this.total;
-                // symbols = [this.total];
+                symbols = [`${this.total}`];
+                str = `${this.total}`;
             }
-        }
+        };
             
         calc.addEventListener('click', e => {
             let target = e.target.closest('td');
