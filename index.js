@@ -12,9 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let str = '';
         const calcFunc = {
             showOnDisplay (symbol) {
+                let lastIndex = symbols.length - 1;
                 function checkSymbol (symbol) {
-                    let lastNumber = calcFunc.findLastNumber(symbols);
-                    let lastIndex = symbols.length - 1
+                    let { number: lastNumber} = calcFunc.findLastNumber(symbols);
                     let bollean = false;
                     // Настройка для корректного показа "."
                     if ( lastNumber && symbol === '.' && lastNumber.includes('.')) {
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (symbols.length > 1 && symbols[lastIndex - 1].match(/[/+*-]/) && !symbols[lastIndex].match(/[.\d]/)){
                             console.log(" error 2");
                             bollean = true;
-                        } else if( !lastNumber.includes('.') && symbols[lastIndex] === '0') {
+                        } else if( typeof lastNumber == 'string' && !lastNumber.match(/[1-9.]/) && symbols[lastIndex] === '0') {
                             console.log(" error 3");
                             bollean = true;
                         }
@@ -43,10 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 if (checkSymbol(symbol)) return;
 
-                if ( symbol.match(/[/*+-]/) && symbols.length === 0) {                   
+                if ( symbol.match(/[/*+.-]/) && symbols.length === 0) {                   
                     symbols.push('0');
                     str = '0';
                 }
+
 
                 if (symbol.match(/[/+*-]/) && symbols[symbols.length - 1].match(/[/+*-]/)) {
                     console.log("Замена знака");
@@ -133,14 +134,22 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             findLastNumber (arr) {
                 let a = [];
+                let firstIndex = 0;
+                let elements = 0;
                 if ( arr.length !== 0 && arr[arr.length - 1].match(/[\d.]/)) {
                     for (let i = arr.length - 1; i>=0; i--) {
                         if ( !arr[i].match(/[\d.]/) ) break;
+                        elements++;
+                        firstIndex = i;
                         a.push(arr[i]);
                     }
                     a = a.reverse().join('');
                 }
-                return a;
+                return {
+                    number: a,
+                    index: firstIndex,
+                    length: elements,
+                };
             }
         };
 
@@ -158,8 +167,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 symbols.pop();
                 input.value = str;
             },
-            percent(arr) {
-                //calcFunc.findLastNumber(symbols);
+            percent() {
+                let {number,index,length} = calcFunc.findLastNumber(symbols);
+                number = `${+number/100}`;
+                symbols.splice(index, length, number);
+                str = str.slice(0,str.length - length) + number;
+                input.value = str;
+                
             },
             division(a,b) {
                 this.total = Number(a)/Number(b);
@@ -203,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         calcMethod.clearSymbol();
                         break;
                     case "percent":
-                        calcMethod.percent();
+                        calcMethod.percent(symbols);
                         break;
                     case "division":
                         calcFunc.showOnDisplay('/');
