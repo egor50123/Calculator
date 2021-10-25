@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     return newArr.splice(firstExpressionIndex,count,`${total}`)
                 }
                 // Проверка есть ли в массиве хотя бы 2 слагаемых
-                if ( (!arr.join('').match(/[/+*.-]\d/)) || arr[arr.length - 1].match(/[/+*.-]/)) return;
+                if ( (!arr.join('').match(/[/+*.-]\d/)) || arr[arr.length - 1].match(/[/+*.-]/)) return false;
                 newArr = arr.slice();
 
                 while (true) {
@@ -128,15 +128,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     if( sortChars.length === 0) break;
                     result(newArr,sortChars[0]);
                     sortChars.splice(0,1);
-
                 }
+                return true;
             },
             findLastNumber (arr) {
                 let a = [];
                 if ( arr.length !== 0 && arr[arr.length - 1].match(/[\d.]/)) {
-                    let lastIndex = null;
                     for (let i = arr.length - 1; i>=0; i--) {
-                        lastIndex = i;
                         if ( !arr[i].match(/[\d.]/) ) break;
                         a.push(arr[i]);
                     }
@@ -148,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const calcMethod = {
             total: null,
+            success: false,
             clear() {
                 str = '';
                 symbols = [];
@@ -180,9 +179,11 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             float() {},
             equally() {
-                input.value = this.total;
-                symbols = [`${this.total}`];
-                str = `${this.total}`;
+                if (this.success) {
+                    input.value = this.total;
+                    symbols = [`${this.total}`];
+                    str = `${this.total}`;
+                }
             }
         };
             
@@ -257,7 +258,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                 }
             }
-            calcFunc.start(symbols);
+
+            calcMethod.success = calcFunc.start(symbols);
 
             if ( symbols.length && symbols.join('').match(/[/+*-]/)) {
                 output.textContent = `${symbols.join('')} = ${calcMethod.total}`;
