@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Калькулятор</title>
+</head>
+<body>
+    <header class = "menu"></header>
+    <main class = "main">
+        <section class="calculator">
+            <div class="calculator__wrapper">
+                <table class="table">
+                    <tr class="display">
+                        <th class="display__th" colspan="4">
+                            <div class = "display__wrapper">
+                                <div class="display__text"></div>
+                                <input class="display__input" type="text" placeholder="0">
+                            </div>
+                        </th>
+                    </tr>
+                    <tr class="buttons">
+                        <td data-action = "clear"><button>AC</button></td>
+                        <td data-action = "clear-symbol"><button><=</button></td>
+                        <td data-action = "percent"><button>%</button></td>
+                        <td data-action = "division"><button>/</button></td>
+                    </tr>
+                    <tr class="buttons">
+                        <td data-number = "7"><button>7</button></td>
+                        <td data-number = "8"><button>8</button></td>
+                        <td data-number = "9"><button>9</button></td>
+                        <td data-action = "multiplication"><button>*</button></td>
+                    </tr>
+                    <tr class="buttons">
+                        <td data-number = "4"><button>4</button></td>
+                        <td data-number = "5"><button>5</button></td>
+                        <td data-number = "6"><button>6</button></td>
+                        <td data-action = "minus"><button>-</button></td>
+                    </tr>
+                    <tr class="buttons">
+                        <td data-number = "1"><button>1</button></td>
+                        <td data-number = "2"><button>2</button></td>
+                        <td data-number = "3"><button>3</button></td>
+                        <td data-action = "add"><button>+</button></td>
+                    </tr>
+                    <tr class="buttons">
+                        <td data-number = "0" colspan="2"><button>0</button></td>
+                        <td data-action = "float"><button>.</button></td>
+                        <td data-action = "equally"><button>=</button></td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </main>
+    <script src="index.js"></script>
+</body>
+</html>
