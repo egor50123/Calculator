@@ -46,7 +46,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 if ( symbol.match(/[/*+.-]/) && symbols.length === 0) {                   
                     symbols.push('0');
                     str = '0';
+                } else if ( symbol.includes('.') && symbols[lastIndex].match(/[-+/*]/)) {                   
+                    symbols.push('0')
+                    str += '0';
                 }
+
+                // if ( symbol.includes('.') && symbols[lastIndex].match(/[-+/*]/)) {                   
+                //     symbols.splice(lastIndex,1,'0');
+                //     str = str.slice(0,-1);
+                // }
 
 
                 if (symbol.match(/[/+*-]/) && symbols[symbols.length - 1].match(/[/+*-]/)) {
@@ -176,20 +184,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 
             },
             division(a,b) {
-                this.total = Number(a)/Number(b);
-                return Number(a)/Number(b);
+                this.total = +(Number(a)/Number(b)).toFixed(5);
+                return +(Number(a)/Number(b)).toFixed(5);
             },
             multiplication(a,b) {
-                this.total = Number(a)*Number(b);
-                return Number(a)*Number(b);
+                this.total = +(Number(a)*Number(b)).toFixed(5);
+                return +(Number(a)*Number(b)).toFixed(5);
             },
             minus(a,b) {
-                this.total = Number(a)-Number(b);
-                return Number(a)-Number(b);
+                this.total = +(Number(a)-Number(b)).toFixed(5);
+                return +(Number(a)-Number(b)).toFixed(5);
             },
             add(a,b) {
-                this.total = Number(a)+Number(b);
-                return Number(a)+Number(b);
+                this.total = +(Number(a)+Number(b)).toFixed(5);
+                return +(Number(a)+Number(b)).toFixed(5);
             },
             float() {},
             equally() {
