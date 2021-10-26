@@ -1,5 +1,4 @@
 'use strict';
-console.log();
 document.addEventListener("DOMContentLoaded", () => {
 
     const calculator = () => {
@@ -50,13 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     symbols.push('0')
                     str += '0';
                 }
-
-                // if ( symbol.includes('.') && symbols[lastIndex].match(/[-+/*]/)) {                   
-                //     symbols.splice(lastIndex,1,'0');
-                //     str = str.slice(0,-1);
-                // }
-
-
+                //смена знака
                 if (symbol.match(/[/+*-]/) && symbols[symbols.length - 1].match(/[/+*-]/)) {
                     console.log("Замена знака");
                     symbols[symbols.length - 1] = symbol;
@@ -129,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     return newArr.splice(firstExpressionIndex,count,`${total}`)
                 }
                 // Проверка есть ли в массиве хотя бы 2 слагаемых
-                if ( (!arr.join('').match(/[/+*.-]\d/)) || arr[arr.length - 1].match(/[/+*.-]/)) return false;
+                if ( (!arr.join('').match(/[/+*-]\d/)) || arr[arr.length - 1].match(/[/+*-]/)) return false;
                 newArr = arr.slice();
 
                 while (true) {
@@ -158,6 +151,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     index: firstIndex,
                     length: elements,
                 };
+            },
+            showInOutput() {
+                let symbolsNew = symbols.slice();
+                if ( symbols[0] === '-') {
+                    symbolsNew.splice(0,1);
+                }
+                if ( symbolsNew.length && symbolsNew.join('').match(/[/+*-]/)) {
+                    output.textContent = `${symbolsNew.join('')} = ${calcMethod.total}`;
+                }
+    
+                if (symbolsNew.length && symbolsNew[symbolsNew.length - 1].match(/[/+*.-]/)) {
+                    output.textContent = '';
+                }
             }
         };
 
@@ -199,12 +205,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.total = +(Number(a)+Number(b)).toFixed(5);
                 return +(Number(a)+Number(b)).toFixed(5);
             },
-            float() {},
             equally() {
                 if (this.success) {
                     input.value = this.total;
-                    symbols = [`${this.total}`];
+                    symbols = `${this.total}`.split('').slice();
                     str = `${this.total}`;
+                    this.total = 0;
+                    console.log(symbols);
                 }
             }
         };
@@ -282,14 +289,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             calcMethod.success = calcFunc.start(symbols);
+            calcFunc.showInOutput();
+        });
 
-            if ( symbols.length && symbols.join('').match(/[/+*-]/)) {
-                output.textContent = `${symbols.join('')} = ${calcMethod.total}`;
-            }
-
-            if (symbols.length && symbols[symbols.length - 1].match(/[/+*.-]/)) {
-                output.textContent = '';
-            }
+        calc.addEventListener( 'input', (e) => {
+            symbols = input.value.split('');
+            calcMethod.success = calcFunc.start(symbols);
+            calcFunc.showInOutput();
         });
     };
 
