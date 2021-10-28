@@ -7,11 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
             output = calc.querySelector('.display__text');
 
         let symbols = [];
-        let newArr = [];
         let str = '';
         const calcFunc = {
+            // функция показа сторки в input
             showOnDisplay (symbol) {
                 let lastIndex = symbols.length - 1;
+                // если символ не проходит проверки - не выодим его и не добавляем в массив
                 function checkSymbol (symbol) {
                     let { number: lastNumber} = calcFunc.findLastNumber(symbols);
                     let bollean = false;
@@ -22,9 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     // Настройка для корректного показа  0
                     if ( symbol === '0' ) {
+                        //Если длина массива больше 1 , предпоследний символ является знаком , последний символ не точка и не цифра
                         if (symbols.length > 1 && symbols[lastIndex - 1].match(/[/+*-]/) && !symbols[lastIndex].match(/[.\d]/)){
                             console.log(" error 2");
                             bollean = true;
+                        // если последнее число в массиве не включает в себя цифры от 1 до 9 или точку и последний символ - 0
                         } else if( typeof lastNumber == 'string' && !lastNumber.match(/[1-9.]/) && symbols[lastIndex] === '0') {
                             console.log(" error 3");
                             bollean = true;
@@ -34,24 +37,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     if( !lastNumber && symbol.match(/\d/) && symbols[lastIndex] === '0') {
                         symbols.splice(-1,1);
                         str = str.slice(0,-1);
-                        console.log("!!!");
                     }
 
                     return bollean;
 
                 }
+                // если функция возвращает true - выходим
                 if (checkSymbol(symbol)) return;
-
+                // если в начале жмем на символ знака , то добавляем дополнительный 0
                 if ( symbol.match(/[/*+.-]/) && symbols.length === 0) {                   
                     symbols.push('0');
                     str = '0';
+                //если нажата точка и  перед  ней есть знак,добавляем перед точкой 0
                 } else if ( symbol.includes('.') && symbols[lastIndex].match(/[-+/*]/)) {                   
                     symbols.push('0')
                     str += '0';
                 }
                 //смена знака
                 if (symbol.match(/[/+*-]/) && symbols[symbols.length - 1].match(/[/+*-]/)) {
-                    console.log("Замена знака");
                     symbols[symbols.length - 1] = symbol;
                     str = str.slice(0,-1) + symbol;
                     input.value = str;
@@ -62,7 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 str+=symbol;
                 input.value = str;
             },
+            //Вычисления
             start(arr) {
+                // Вычисления будут производится в соответствии с массивом приоритета выполнения действий
                 function makePriority(arr) {
                     let  chars = [];
                         for ( let i = 0; i < arr.length; i++) {
@@ -82,6 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     chars.sort( (a,b) => b.priority - a.priority);
                     return chars;
                 }
+
+                // Вычисляет значение выражения из 2ух слагаемых
                 function result(arrFromDisplay,{name, index}) {
                     let total = null;
                     let a = [];
@@ -119,20 +126,26 @@ document.addEventListener("DOMContentLoaded", () => {
                         case "*": total = calcMethod.multiplication(a,b);
                             break;
                     }
+
+                    //вместо предыдущих 2ух слагаемых подставляем тотал
                     return newArr.splice(firstExpressionIndex,count,`${total}`)
                 }
-                // Проверка есть ли в массиве хотя бы 2 слагаемых
-                if ( (!arr.join('').match(/[/+*-]\d/)) || arr[arr.length - 1].match(/[/+*-]/)) return false;
-                newArr = arr.slice();
+            // если в массиве нету хотя бы 2ух слагаемых или последний элемент массива - знак
+            if ( !arr.join('').match(/\-?\.?\d+\.?[+*/-]\.?\d+/) || arr[arr.length - 1].match(/[-/+*]/)) return false;
+                let newArr = arr.slice();
+                console.log("go");
 
+                // Вычисляем значение выражения из дисплея
                 while (true) {
                     let sortChars = makePriority(newArr);
                     if( sortChars.length === 0) break;
                     result(newArr,sortChars[0]);
                     sortChars.splice(0,1);
                 }
+                // Если true, можем прожать знак равно (выполнить функцию calcMethod.equally())
                 return true;
             },
+            //находим последнее число в массиве
             findLastNumber (arr) {
                 let a = [];
                 let firstIndex = 0;
@@ -146,24 +159,57 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     a = a.reverse().join('');
                 }
+                // возвращаем число,его индекс м исходном массиве и длину
                 return {
                     number: a,
                     index: firstIndex,
                     length: elements,
                 };
             },
+            // Здесь выводим выражение в output
             showInOutput() {
-                let symbolsNew = symbols.slice();
-                if ( symbols[0] === '-') {
-                    symbolsNew.splice(0,1);
-                }
-                if ( symbolsNew.length && symbolsNew.join('').match(/[/+*-]/)) {
-                    output.textContent = `${symbolsNew.join('')} = ${calcMethod.total}`;
-                }
-    
-                if (symbolsNew.length && symbolsNew[symbolsNew.length - 1].match(/[/+*.-]/)) {
+                let totalStr = String(calcMethod.total);
+
+                // если есть 2 слагаемых - выводим результат 
+                if (symbols.join('').match(/-?\d+\.?[-+/*]\d+\.?/g)) {
+                    output.textContent = `${symbols.join('')} = ${totalStr}`;
+
+                    if ( calcMethod.total > 1000000 ) {
+                    totalStr = `${totalStr[0]},${totalStr.slice(2,7)}*10^${totalStr.slice(7,-1).length + 1}`;
+                    }
+
+                    if(str.length > 8) {
+                        output.textContent = `${symbols.slice(0,10).join('')}... = ${totalStr}`;
+                    }
+                } else  {
                     output.textContent = '';
                 }
+
+            },
+            // Ищем ошибки
+            isError(str) {
+                class ValidationError extends Error {
+                    constructor(message) {
+                      super(message);
+                      this.name = "SyntaxError";
+                    }
+                }
+                if (str.match(/[-+/*]{2}/) ) {
+                    throw new ValidationError("Лишние знаки");
+                }
+
+                if ( str.match(/\/0/)) {
+                    throw new ValidationError("Деление на 0!");
+                }
+                
+                if ( str.match(/\d+\.\d+\./) || str.match(/\.\d+\./) || str.match(/\.{2}/)) {
+                    throw new ValidationError("Много точек");
+                }
+
+                if ( str.match(/[^/+*\d.-]/i) && str.length > 0) {
+                    throw new ValidationError("Недопустимые символы");
+                }
+                
             }
         };
 
@@ -183,9 +229,9 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             percent() {
                 let {number,index,length} = calcFunc.findLastNumber(symbols);
-                number = `${+number/100}`;
+                number = `${+(number/100).toFixed(5)}`;
                 symbols.splice(index, length, number);
-                str = str.slice(0,str.length - length) + number;
+                str = symbols.join('')
                 input.value = str;
                 
             },
@@ -211,7 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     symbols = `${this.total}`.split('').slice();
                     str = `${this.total}`;
                     this.total = 0;
-                    console.log(symbols);
                 }
             }
         };
@@ -288,16 +333,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            calcMethod.success = calcFunc.start(symbols);
-            calcFunc.showInOutput();
+            try {
+                calcFunc.isError(str);
+                calcMethod.success = calcFunc.start(symbols);
+                calcFunc.showInOutput();
+            } catch(err) {
+                output.textContent = "Ошибка";
+            }
         });
 
-        calc.addEventListener( 'input', (e) => {
-            symbols = input.value.split('');
-            calcMethod.success = calcFunc.start(symbols);
-            calcFunc.showInOutput();
+        input.addEventListener( 'input', () => {
+            try {
+                symbols = input.value.split('');
+                str = symbols.join('');
+                calcFunc.isError(str);
+                calcMethod.success = calcFunc.start(symbols);
+                calcFunc.showInOutput();
+            } catch (err) {
+                output.textContent = "Ошибка";
+            }
         });
+
+        console.log()
     };
-
     calculator();
 });
