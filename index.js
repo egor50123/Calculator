@@ -9,12 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
         let symbols = [];
         let str = '';
         const calcFunc = {
-            // функция показа сторки в input
+            // функция показа строки в input
             showOnDisplay (symbol) {
+                let { number: lastNumber} = this.findLastNumber(symbols);
                 let lastIndex = symbols.length - 1;
+
                 // если символ не проходит проверки - не выодим его и не добавляем в массив
                 function checkSymbol (symbol) {
-                    let { number: lastNumber} = calcFunc.findLastNumber(symbols);
                     let bollean = false;
                     // Настройка для корректного показа "."
                     if ( lastNumber && symbol === '.' && lastNumber.includes('.')) {
@@ -31,10 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         } else if( typeof lastNumber == 'string' && !lastNumber.match(/[1-9.]/) && symbols[lastIndex] === '0') {
                             console.log(" error 3");
                             bollean = true;
-                        }
+                        } 
                     }
                     //Убираем 0 если поле него идет цифра (если ноль не часть числа до точки)
                     if( !lastNumber && symbol.match(/\d/) && symbols[lastIndex] === '0') {
+                        console.log("!!!")
                         symbols.splice(-1,1);
                         str = str.slice(0,-1);
                     }
@@ -43,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 }
                 // если функция возвращает true - выходим
+
                 if (checkSymbol(symbol)) return;
                 // если в начале жмем на символ знака , то добавляем дополнительный 0
                 if ( symbol.match(/[/*+.-]/) && symbols.length === 0) {                   
@@ -60,6 +63,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     input.value = str;
                     return;
                 }
+                // Если первый символ 0 и длина строки 1  -  меняем ноль на соответсвующее число
+                if( typeof lastNumber == 'string') {
+                    if(symbol.match(/[1-9]/) && !lastNumber.match(/\./) && symbols[lastIndex] === '0') {
+                        symbols[lastIndex] = symbol;
+                        str = symbols.join('');
+                        input.value = str;
+                        return;
+                    }
+                }
 
                 symbols.push(symbol);
                 str+=symbol;
@@ -67,78 +79,110 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             //Вычисления
             start(arr) {
-                // Вычисления будут производится в соответствии с массивом приоритета выполнения действий
-                function makePriority(arr) {
-                    let  chars = [];
-                        for ( let i = 0; i < arr.length; i++) {
-                            let item = arr[i];
-                            switch(item) {
-                                case "+": chars.push( {name: "+", index: i,priority: 1,} );
-                                break;
-                                case "-": chars.push( {name: "-", index: i,priority: 1,} );
-                                break;
-                                case "/": chars.push( {name: "/", index: i,priority: 10,} );
-                                break;
-                                case "*": chars.push( {name: "*", index: i,priority: 10,} );
-                                break;
-                                default: break;
-                            }
-                        }
-                    chars.sort( (a,b) => b.priority - a.priority);
-                    return chars;
+            // Вычисления будут производится в соответствии с массивом приоритета выполнения действий
+            function makePriority(arr) {
+                let chars = [];
+                let morePriority = 0;
+
+                for ( let i = 0; i < arr.length; i++) {
+                    let item = arr[i];
+                    if ( item === '(') {
+                        morePriority+=100;
+                    } else if ( item === ')') {
+                        morePriority-=100;
+                    }
+                    switch(item) {
+                        case "+": chars.push( {name: "+", index: i,priority: 1 + morePriority,} );
+                        break;
+                        case "-": chars.push( {name: "-", index: i,priority: 1 + morePriority,} );
+                        break;
+                        case "/": chars.push( {name: "/", index: i,priority: 10 + morePriority,} );
+                        break;
+                        case "*": chars.push( {name: "*", index: i,priority: 10 + morePriority,} );
+                        break;
+                        default: break;
+                    }
+                }
+                chars.sort( (a,b) => b.priority - a.priority);
+                return chars;
+            }
+            // Вычисляет значение выражения из 2ух слагаемых
+            function result(arrFromDisplay,{name, index}) {
+                let total = null;
+                let a = [];
+                let b = [];
+                let firstExpressionIndex = null;
+                let lastExpressionIndex = null;
+                let count = 1;
+
+                for ( let i = index-1; i >= 0; i--) {
+                    if ( !arrFromDisplay[i].match(/[\d.]/) ) break;
+                    firstExpressionIndex = i;
+                    count++;
+                    a.push(arrFromDisplay[i]);
+                }
+                
+                for ( let i = index+1; i < arrFromDisplay.length; i++) {
+                    if ( !arrFromDisplay[i].match(/[\d.]/) ) break;
+                    lastExpressionIndex = i;
+                    count++;
+                    b.push(arrFromDisplay[i]);
+                    
                 }
 
-                // Вычисляет значение выражения из 2ух слагаемых
-                function result(arrFromDisplay,{name, index}) {
-                    let total = null;
-                    let a = [];
-                    let b = [];
-                    let firstExpressionIndex = null;
-                    let count = 1;
-                    
-                    for ( let i = index-1; i >= 0; i--) {
-                      if ( !arrFromDisplay[i].match(/[\d.]/) ) {
+                a = a.reverse().join("");
+                b = b.join("");
+
+                switch(name) {
+                    case "-": total = calcMethod.minus(a,b);
                         break;
-                      }
-                      firstExpressionIndex = i;
-                      count++;
-                      a.push(arrFromDisplay[i]);
-                    }
-                    
-                    for ( let i = index+1; i < arrFromDisplay.length; i++) {
-                      if ( !arrFromDisplay[i].match(/[\d.]/) ) {
+                    case "+": total = calcMethod.add(a,b);
                         break;
-                      }
-                      count++;
-                      b.push(arrFromDisplay[i]);
-                    }
-
-                    a = a.reverse().join("");
-                    b = b.join("");
-
-                    switch(name) {
-                        case "-": total = calcMethod.minus(a,b);
-                            break;
-                        case "+": total = calcMethod.add(a,b);
-                            break;
-                        case "/": total = calcMethod.division(a,b);
-                            break;
-                        case "*": total = calcMethod.multiplication(a,b);
-                            break;
-                    }
-
-                    //вместо предыдущих 2ух слагаемых подставляем тотал
-                    return newArr.splice(firstExpressionIndex,count,`${total}`)
+                    case "/": total = calcMethod.division(a,b);
+                        break;
+                    case "*": total = calcMethod.multiplication(a,b);
+                        break;
                 }
+                if (newArr[firstExpressionIndex-1] === '(' && newArr[lastExpressionIndex+1] === ')') {
+                    newArr.splice(firstExpressionIndex - 1,count + 2,`${total}`);
+                } else {
+                    newArr.splice(firstExpressionIndex,count,`${total}`);
+                }
+                //вместо предыдущих 2ух слагаемых подставляем тотал
+            }
+
+            function changeNumInStaples () {
+                let regexp = /\((\d+)\)/g;
+                let matchAll = str.matchAll(regexp);
+                let lessIndex = 0;
+                matchAll = Array.from(matchAll)
+
+                for ( let i = 0; i<matchAll.length; i++) {
+                    let curMatch = matchAll[i];
+                    let clearNum = curMatch[1];
+                    let totalItems = clearNum.length+2;
+                    let firstIndex = curMatch.index + lessIndex;
+
+                    arr.splice(firstIndex,totalItems, clearNum);
+                    str = arr.join('');
+                    arr = str.split('');
+                    lessIndex -= 2;
+                }
+                console.log(arr);
+            }
+
+            if ( str.match(/\(\d+\)/) ) {
+                changeNumInStaples();
+            }
             // если в массиве нету хотя бы 2ух слагаемых или последний элемент массива - знак
-            if ( !arr.join('').match(/\-?\.?\d+\.?[+*/-]\.?\d+/) || arr[arr.length - 1].match(/[-/+*]/)) return false;
+            if ( !arr.join('').match(/\-?\.?\d+\.?[+*/-]\.?\(?\d+\)?/) || arr[arr.length - 1].match(/[-/+*]/)) return false;
+            console.log(arr)
+            //changeNumInStaples()
                 let newArr = arr.slice();
-                console.log("go");
-
                 // Вычисляем значение выражения из дисплея
                 while (true) {
                     let sortChars = makePriority(newArr);
-                    if( sortChars.length === 0) break;
+                    if( sortChars.length === 0) break;  
                     result(newArr,sortChars[0]);
                     sortChars.splice(0,1);
                 }
@@ -169,18 +213,23 @@ document.addEventListener("DOMContentLoaded", () => {
             // Здесь выводим выражение в output
             showInOutput() {
                 let totalStr = String(calcMethod.total);
-
                 // если есть 2 слагаемых - выводим результат 
                 if (symbols.join('').match(/-?\d+\.?[-+/*]\d+\.?/g)) {
                     output.textContent = `${symbols.join('')} = ${totalStr}`;
 
-                    if ( calcMethod.total > 1000000 ) {
-                    totalStr = `${totalStr[0]},${totalStr.slice(2,7)}*10^${totalStr.slice(7,-1).length + 1}`;
-                    }
+                if ( calcMethod.total > 100000) {
+                    console.log("!!!!");
+                    totalStr = `${totalStr[0]},${totalStr.slice(2,5)}*10^${totalStr.slice(1,-1).length + 1}`;
+                }
 
-                    if(str.length > 8) {
+                if(str.length > 12) {
+                    if (calcMethod.total > Math.pow(10,14)) {
+                        console.log(Math.pow(10,14))
+                        output.textContent = "bigNumber";
+                    } else {
                         output.textContent = `${symbols.slice(0,10).join('')}... = ${totalStr}`;
                     }
+                }
                 } else  {
                     output.textContent = '';
                 }
@@ -196,20 +245,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 if (str.match(/[-+/*]{2}/) ) {
                     throw new ValidationError("Лишние знаки");
-                }
-
-                if ( str.match(/\/0/)) {
+                } else if ( str.match(/\/0/)) {
                     throw new ValidationError("Деление на 0!");
-                }
-                
-                if ( str.match(/\d+\.\d+\./) || str.match(/\.\d+\./) || str.match(/\.{2}/)) {
+                } else if ( str.match(/\d+\.\d+\./) || str.match(/\.\d+\./) || str.match(/\.{2}/)) {
                     throw new ValidationError("Много точек");
-                }
-
-                if ( str.match(/[^/+*\d.-]/i) && str.length > 0) {
+                } else if ( str.match(/[^/+*\d.()-]/i) && str.length > 0) {
                     throw new ValidationError("Недопустимые символы");
-                }
-                
+                } else if ( str.match(/[+/*-]\.[+/*-]/)) {
+                    throw new ValidationError("Лишние знаки");
+                }       
             }
         };
 
@@ -228,12 +272,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 input.value = str;
             },
             percent() {
+                let lastIndex = str.length - 1
+                if (str[lastIndex].match(/[-+/*]/) || (str.match(/[-+/*]\./) && str[lastIndex] === '.') || (str[0] === '.' && str.length === 1)) return;
                 let {number,index,length} = calcFunc.findLastNumber(symbols);
                 number = `${+(number/100).toFixed(5)}`;
                 symbols.splice(index, length, number);
-                str = symbols.join('')
+                str = symbols.join('');
                 input.value = str;
-                
             },
             division(a,b) {
                 this.total = +(Number(a)/Number(b)).toFixed(5);
@@ -253,6 +298,10 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             equally() {
                 if (this.success) {
+                    if(this.total > Math.pow(10,14)) {
+                        this.total = 0;
+                        output.textContent = "Слишком большое число";
+                    }
                     input.value = this.total;
                     symbols = `${this.total}`.split('').slice();
                     str = `${this.total}`;
@@ -333,13 +382,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            try {
-                calcFunc.isError(str);
-                calcMethod.success = calcFunc.start(symbols);
-                calcFunc.showInOutput();
-            } catch(err) {
-                output.textContent = "Ошибка";
-            }
+            calcFunc.isError(str);
+            calcMethod.success = calcFunc.start(symbols);
+            calcFunc.showInOutput();
         });
 
         input.addEventListener( 'input', () => {
@@ -351,10 +396,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 calcFunc.showInOutput();
             } catch (err) {
                 output.textContent = "Ошибка";
+                console.log(err.message)
             }
         });
-
-        console.log()
     };
     calculator();
 });
