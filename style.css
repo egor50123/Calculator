@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+td {
+    padding: 0;
+}
+
 .calculator__wrapper {
     display: flex;
     justify-content: center;
@@ -16,7 +20,11 @@
     overflow: hidden;
     position: relative;
 }
-
+.buttons button {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
 .buttons td {
     background-color:rgb(255, 255, 255);
     width: 80px;
@@ -50,7 +58,7 @@
     font-size: 20px;
 }
 
-.buttons td:hover {
+.buttons td:not(.staples):hover {
     background-color: rgb(233, 233, 233);
 }
 
@@ -61,6 +69,7 @@
 .buttons td:last-child {
     background-color: rgb(240, 137, 40);
 }
+
 .display__wrapper{
     position: relative;
     width: 100%;
@@ -92,4 +101,28 @@
 
 .display__input:focus {
     outline: none;
+}
+
+
+.staples-divide {
+    position: relative;
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+}
+
+.staples-divide::after {
+    display: block;
+    content: "";
+    top: 0;
+    right: 50%;
+    position: absolute;
+    width: 1px;
+    height: 103%;
+    background-color:rgb(197, 195, 195);
+}
+
+.staple--right:hover,
+.staple--left:hover{
+    background-color: rgb(233, 233, 233);
 }

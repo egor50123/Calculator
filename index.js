@@ -80,114 +80,112 @@ document.addEventListener("DOMContentLoaded", () => {
             //Вычисления
             start(arr) {
             // Вычисления будут производится в соответствии с массивом приоритета выполнения действий
-            function makePriority(arr) {
-                let chars = [];
-                let morePriority = 0;
+                function makePriority(arr) {
+                    let chars = [];
+                    let morePriority = 0;
 
-                for ( let i = 0; i < arr.length; i++) {
-                    let item = arr[i];
-                    if ( item === '(') {
-                        morePriority+=100;
-                    } else if ( item === ')') {
-                        morePriority-=100;
+                    for ( let i = 0; i < arr.length; i++) {
+                        let item = arr[i];
+                        if ( item === '(') {
+                            morePriority+=100;
+                        } else if ( item === ')') {
+                            morePriority-=100;
+                        }
+                        switch(item) {
+                            case "+": chars.push( {name: "+", index: i,priority: 1 + morePriority,} );
+                            break;
+                            case "-": chars.push( {name: "-", index: i,priority: 1 + morePriority,} );
+                            break;
+                            case "/": chars.push( {name: "/", index: i,priority: 10 + morePriority,} );
+                            break;
+                            case "*": chars.push( {name: "*", index: i,priority: 10 + morePriority,} );
+                            break;
+                            default: break;
+                        }
                     }
-                    switch(item) {
-                        case "+": chars.push( {name: "+", index: i,priority: 1 + morePriority,} );
-                        break;
-                        case "-": chars.push( {name: "-", index: i,priority: 1 + morePriority,} );
-                        break;
-                        case "/": chars.push( {name: "/", index: i,priority: 10 + morePriority,} );
-                        break;
-                        case "*": chars.push( {name: "*", index: i,priority: 10 + morePriority,} );
-                        break;
-                        default: break;
-                    }
+                    chars.sort( (a,b) => b.priority - a.priority);
+                    return chars;
                 }
-                chars.sort( (a,b) => b.priority - a.priority);
-                return chars;
-            }
-            // Вычисляет значение выражения из 2ух слагаемых
-            function result(arrFromDisplay,{name, index}) {
-                let total = null;
-                let a = [];
-                let b = [];
-                let firstExpressionIndex = null;
-                let lastExpressionIndex = null;
-                let count = 1;
+                // Вычисляет значение выражения из 2ух слагаемых
+                function result(arrFromDisplay,{name, index}) {
+                    let total = null;
+                    let a = [];
+                    let b = [];
+                    let firstExpressionIndex = null;
+                    let lastExpressionIndex = null;
+                    let count = 1;
 
-                for ( let i = index-1; i >= 0; i--) {
-                    if ( !arrFromDisplay[i].match(/[\d.]/) ) break;
-                    firstExpressionIndex = i;
-                    count++;
-                    a.push(arrFromDisplay[i]);
-                }
-                
-                for ( let i = index+1; i < arrFromDisplay.length; i++) {
-                    if ( !arrFromDisplay[i].match(/[\d.]/) ) break;
-                    lastExpressionIndex = i;
-                    count++;
-                    b.push(arrFromDisplay[i]);
+                    for ( let i = index-1; i >= 0; i--) {
+                        if ( !arrFromDisplay[i].match(/[\d.]/) ) break;
+                        firstExpressionIndex = i;
+                        count++;
+                        a.push(arrFromDisplay[i]);
+                    }
                     
+                    for ( let i = index+1; i < arrFromDisplay.length; i++) {
+                        if ( !arrFromDisplay[i].match(/[\d.]/) ) break;
+                        lastExpressionIndex = i;
+                        count++;
+                        b.push(arrFromDisplay[i]);
+                        
+                    }
+
+                    a = a.reverse().join("");
+                    b = b.join("");
+
+                    switch(name) {
+                        case "-": total = calcMethod.minus(a,b);
+                            break;
+                        case "+": total = calcMethod.add(a,b);
+                            break;
+                        case "/": total = calcMethod.division(a,b);
+                            break;
+                        case "*": total = calcMethod.multiplication(a,b);
+                            break;
+                    }
+                    if (newArr[firstExpressionIndex-1] === '(' && newArr[lastExpressionIndex+1] === ')') {
+                        newArr.splice(firstExpressionIndex - 1,count + 2,`${total}`);
+                    } else {
+                        newArr.splice(firstExpressionIndex,count,`${total}`);
+                    }
+                    //вместо предыдущих 2ух слагаемых подставляем тотал
+                }
+                // Убирает скобки у числа заключенного в  них, меняет arr
+                function changeNumInStaples () {
+                    let regexp = /\((\d+)\)/g;
+                    let matchAll = str.matchAll(regexp);
+                    let lessIndex = 0;
+                    matchAll = Array.from(matchAll)
+
+                    for ( let i = 0; i<matchAll.length; i++) {
+                        let curMatch = matchAll[i];
+                        let clearNum = curMatch[1];
+                        let totalItems = clearNum.length+2;
+                        let firstIndex = curMatch.index + lessIndex;
+
+                        arr.splice(firstIndex,totalItems, clearNum);
+                        str = arr.join('');
+                        arr = str.split('');
+                        lessIndex -= 2;
+                    }
                 }
 
-                a = a.reverse().join("");
-                b = b.join("");
-
-                switch(name) {
-                    case "-": total = calcMethod.minus(a,b);
-                        break;
-                    case "+": total = calcMethod.add(a,b);
-                        break;
-                    case "/": total = calcMethod.division(a,b);
-                        break;
-                    case "*": total = calcMethod.multiplication(a,b);
-                        break;
+                if ( str.match(/\(\d+\)/) ) {
+                    changeNumInStaples();
                 }
-                if (newArr[firstExpressionIndex-1] === '(' && newArr[lastExpressionIndex+1] === ')') {
-                    newArr.splice(firstExpressionIndex - 1,count + 2,`${total}`);
-                } else {
-                    newArr.splice(firstExpressionIndex,count,`${total}`);
-                }
-                //вместо предыдущих 2ух слагаемых подставляем тотал
-            }
-
-            function changeNumInStaples () {
-                let regexp = /\((\d+)\)/g;
-                let matchAll = str.matchAll(regexp);
-                let lessIndex = 0;
-                matchAll = Array.from(matchAll)
-
-                for ( let i = 0; i<matchAll.length; i++) {
-                    let curMatch = matchAll[i];
-                    let clearNum = curMatch[1];
-                    let totalItems = clearNum.length+2;
-                    let firstIndex = curMatch.index + lessIndex;
-
-                    arr.splice(firstIndex,totalItems, clearNum);
-                    str = arr.join('');
-                    arr = str.split('');
-                    lessIndex -= 2;
-                }
-                console.log(arr);
-            }
-
-            if ( str.match(/\(\d+\)/) ) {
-                changeNumInStaples();
-            }
-            // если в массиве нету хотя бы 2ух слагаемых или последний элемент массива - знак
-            if ( !arr.join('').match(/\-?\.?\d+\.?[+*/-]\.?\(?\d+\)?/) || arr[arr.length - 1].match(/[-/+*]/)) return false;
-            console.log(arr)
-            //changeNumInStaples()
-                let newArr = arr.slice();
-                // Вычисляем значение выражения из дисплея
-                while (true) {
-                    let sortChars = makePriority(newArr);
-                    if( sortChars.length === 0) break;  
-                    result(newArr,sortChars[0]);
-                    sortChars.splice(0,1);
-                }
-                // Если true, можем прожать знак равно (выполнить функцию calcMethod.equally())
-                return true;
+                // если в массиве нету хотя бы 2ух слагаемых или последний элемент массива - знак
+                if ( !arr.join('').match(/\-?\.?\d+\.?[+*/-]\.?\(?\d+\)?/) || arr[arr.length - 1].match(/[-/+*]/)) return false;
+                //changeNumInStaples()
+                    let newArr = arr.slice();
+                    // Вычисляем значение выражения из дисплея
+                    while (true) {
+                        let sortChars = makePriority(newArr);
+                        if( sortChars.length === 0) break;  
+                        result(newArr,sortChars[0]);
+                        sortChars.splice(0,1);
+                    }
+                    // Если true, можем прожать знак равно (выполнить функцию calcMethod.equally())
+                    return true;
             },
             //находим последнее число в массиве
             findLastNumber (arr) {
@@ -254,6 +252,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else if ( str.match(/[+/*-]\.[+/*-]/)) {
                     throw new ValidationError("Лишние знаки");
                 }       
+            },
+            changeFont(str) {
+                if (str.length >= 26) {
+                    input.style.fontSize = "14px";
+                } else if (str.length >= 18) {
+                    input.style.fontSize = "20px";
+                } else if (str.length >= 15) {
+                    input.style.fontSize = "28px";
+                } else {
+                    input.style.fontSize = "35px";
+                }
             }
         };
 
@@ -346,6 +355,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     case "equally":
                         calcMethod.equally();
                         break;
+                    case "staples":
+                        if (e.target.closest('button').dataset.action === 'staple-right') {
+                            calcFunc.showOnDisplay('(');
+                        } else if (e.target.closest('button').dataset.action === 'staple-left')  {
+                            calcFunc.showOnDisplay(')');
+                        }
+                        break;
                 }
             } else if (number) {
                 switch(number) {
@@ -381,13 +397,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                 }
             }
-
+            calcFunc.changeFont(str);
             calcFunc.isError(str);
             calcMethod.success = calcFunc.start(symbols);
             calcFunc.showInOutput();
         });
 
         input.addEventListener( 'input', () => {
+            calcFunc.changeFont(str);
             try {
                 symbols = input.value.split('');
                 str = symbols.join('');

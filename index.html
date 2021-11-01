@@ -23,7 +23,7 @@
                     </tr>
                     <tr class="buttons">
                         <td data-action = "clear"><button>AC</button></td>
-                        <td data-action = "clear-symbol"><button><=</button></td>
+                        <td data-action = "clear-symbol"><button>CE</button></td>
                         <td data-action = "percent"><button>%</button></td>
                         <td data-action = "division"><button>/</button></td>
                     </tr>
@@ -46,8 +46,14 @@
                         <td data-action = "add"><button>+</button></td>
                     </tr>
                     <tr class="buttons">
-                        <td data-number = "0" colspan="2"><button>0</button></td>
+                        <td data-number = "0"><button>0</button></td>
                         <td data-action = "float"><button>.</button></td>
+                        <td class="staples" data-action = "staples">
+                            <div class="staples-divide">
+                                <button class="staple staple--right" data-action = "staple-right">(</button>
+                                <button class="staple staple--left" data-action = "staple-left">)</button>
+                            </div>
+                        </td>
                         <td data-action = "equally"><button>=</button></td>
                     </tr>
                 </table>
