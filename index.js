@@ -251,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // ожидаем закрытие скобок
                 if ( !this.checkStaples()) { boolean = false; }
                 // если есть выражение вида "[-+/*] )" или последний символ - знак
-                console.log(str[str.length - 1])
                 if ( str && (str.match(/[-+/*]\)/) || str[str.length - 1].match(/[-+/*]/))) { boolean = false; }
                 // если есть 2 слагаемых - выводим результат
                 if (boolean && symbols.join('').match(/-?\d+\.?[-+/*]\d+\.?/)) {
