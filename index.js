@@ -205,12 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 // если не все скобки закрыты , то не продолжаем
                 if ( !this.checkStaples() ) return false;
                 // если есть выражение вида "[-+/*] )" - выходим
-                if ( str.match(/[-+/*]\)/)) return false;
+                if ( str && str.match(/[-+/*]\)/)) return false;
                 // если в массиве нету хотя бы 2ух слагаемых или последний элемент массива - знак
                 if ( !arr.join('').match(/\-?\.?\d+\.?[+*/-]\.?\(?\d+\)?/) || arr[arr.length - 1].match(/[-/+*]/)) return false;
 
                 // если есть число , заключенное в скобки - убираем скобки
-                if ( str.match(/\(\d+\)/) ) { changeNumInStaples();}
+                if ( str && str.match(/\(\d+\)/) ) { changeNumInStaples();}
                 
                 let newArr = arr.slice();
                 // Вычисляем значение выражения
@@ -251,7 +251,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // ожидаем закрытие скобок
                 if ( !this.checkStaples()) { boolean = false; }
                 // если есть выражение вида "[-+/*] )" или последний символ - знак
-                if ( str.match(/[-+/*]\)/) || str[str.length - 1].match(/[-+/*]/)) { boolean = false; }
+                console.log(str[str.length - 1])
+                if ( str && (str.match(/[-+/*]\)/) || str[str.length - 1].match(/[-+/*]/))) { boolean = false; }
                 // если есть 2 слагаемых - выводим результат
                 if (boolean && symbols.join('').match(/-?\d+\.?[-+/*]\d+\.?/)) {
                     output.textContent = `${symbols.join('')} = ${totalStr}`;
@@ -451,7 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 calcFunc.showInOutput();
             } catch(err) {
                 output.textContent = "Ошибка";
-                console.log(err.message);
+                console.log(err.stack)
             }
         });
 
@@ -467,7 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 calcFunc.showInOutput();
             } catch (err) {
                 output.textContent = "Ошибка";
-                console.log(err.message);
+                console.log(err.stack);
             }
         });
     };
