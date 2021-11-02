@@ -97,6 +97,7 @@ td {
     margin: 0;
     padding: 5px 13px;
     text-align: right;
+    vertical-align: bottom;
 }
 
 .display__input:focus {
